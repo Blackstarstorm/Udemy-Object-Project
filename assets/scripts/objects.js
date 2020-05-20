@@ -22,10 +22,12 @@ function renderMovies(filter = "") {
     const movieEl = document.createElement("li");
     const { info, ...otherProps } = movie;
     console.log(otherProps);
-    const { title: movieTitle } = info;
-    let text = movieTitle + " - ";
+    // const { title: movieTitle } = info;
+    let { getFormattedTitle } = movie;
+    // getFormattedTitle = getFormattedTitle.bind(movie);
+    let text = getFormattedTitle.call(movie) + " - ";
     for (const key in info) {
-      if (key !== "title") {
+      if (key !== "title" && key !== "_title") {
         text = text + `${key}: ${info[key]}`;
       }
     }
@@ -47,11 +49,26 @@ function addMovieHandler() {
   
   const newMovie = {
     info: {
-      title,
+      set title(value) {
+        if (value.trim() === "") {
+          this._title = "DEFAULT";
+          return;
+        }
+        this._title = value
+      },
+      get title() {
+        return this._title;
+      },
       [extraName]: extraValue
     },
-    id: Math.random().toString()
+    id: Math.random().toString(),
+    getFormattedTitle() {
+      return this.info.title.toUpperCase();
+    }
   };
+
+  newMovie.info.title = title;
+  console.log(newMovie.info.title);
 
   movies.push(newMovie);
   renderMovies();
@@ -63,4 +80,4 @@ function searchMovieHandler() {
 };
 
 addMovieBtn.addEventListener("click", addMovieHandler);
-searchBtn.addEventListener("click",searchMovieHandler)
+searchBtn.addEventListener("click", searchMovieHandler);
